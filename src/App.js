@@ -1,26 +1,51 @@
 import './App.css';
-import Row from './Row';
-import requests from './requests';
-import Banner from './Banner/Banner';
-import Navbar from './Navbar/Navbar';
-
+import React , {useEffect} from 'react';
+import HomeScreen from './screens/HomeScreen/HomeScreen';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route
+} from "react-router-dom";
+import LoginScreen from './screens/LoginScreen/LoginScreen';
+import { auth } from './firebase';
+import {useDispatch, useSelector} from "react-redux";
+import { login, logout, selectUser } from './features/userSlice';
+import ProfileScreen from './screens/ProfileScreen/ProfileScreen';
 
 function App() {
+
+  const user = useSelector(selectUser);
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((userAuth)=>{
+      if(userAuth) {
+        console.log(userAuth);
+        dispatch(login({
+          uid:userAuth.uid,
+          email: userAuth.email
+        }
+        ));
+      } else{
+        dispatch(logout());
+      }
+    });
+
+    return unsubscribe; 
+  }, [dispatch]);
+
   return (
     <div className="app">
-      <Navbar/>
-      <Banner/>
-      <Row title= "NETFLIX ORIGINALS" 
-      fetchURL={requests.fetchNetflixOriginals}
-      isLargeRow
-      />
-      <Row title=" Trending Now" fetchURL={requests.fetchTrending}/>
-      <Row title=" Top Rated" fetchURL={requests.fetchTopRated}/>
-      <Row title=" Comedy" fetchURL={requests.fetchComedyMovies}/>
-      <Row title=" Horror" fetchURL={requests.fetchHorrorMovies}/>
-      <Row title=" Action" fetchURL={requests.fetchActionMovies}/>
-      <Row title=" Romance" fetchURL={requests.fetchRomanceMovies}/>
-      <Row title=" Documentry" fetchURL={requests.fetchDocumentaries}/>
+      <Router>
+        {!user? (
+          <LoginScreen/>
+        ): (<Routes>
+          <Route exact path="/" element={<HomeScreen />}/>
+          <Route exact path="/profile" element={<ProfileScreen/>} /> 
+        </Routes>
+        )}
+      </Router>
     </div>
   );
 }

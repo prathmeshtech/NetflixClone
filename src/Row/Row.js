@@ -1,5 +1,5 @@
 import React,{useState, useEffect} from 'react'
-import axios from './axios'; // as we have declared export default instance, we can change the name while importing
+import axios from '../axios'; // as we have declared export default instance, we can change the name while importing
 // If it was not default then we had to do like import instance from './axios'.
 import "./row.css";
 import YouTube from "react-youtube";
